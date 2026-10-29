@@ -5,7 +5,7 @@ use sakila;
 -- ==============================================
 -- 1:  Para cada actor, muestra el número total de películas en las que aparece; es decir, cuenta cuántas filas de film_actor corresponden a cada actor.
 
-SELECT * FROM actor;
+SELECT * FROM film_actor;
 -- 2:  Lista solo los actores que participan en 20 o más películas (umbral alto) con su conteo.
 -- 3:  Para cada idioma, indica cuántas películas están catalogadas en ese idioma.
 -- 4:  Muestra el promedio de duración (length) de las películas por idioma y filtra aquellos idiomas con duración media estrictamente mayor a 110 minutos.
