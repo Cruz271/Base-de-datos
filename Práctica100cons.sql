@@ -11,28 +11,51 @@ SELECT concat(first_name," ", last_name) AS nombre, count(film_id) AS películas
 -- 3:  Para cada idioma, indica cuántas películas están catalogadas en ese idioma.
 SELECT name, count(film_id) FROM language JOIN film USING(language_id) group by language_id;
 -- 4:  Muestra el promedio de duración (length) de las películas por idioma y filtra aquellos idiomas con duración media estrictamente mayor a 110 minutos.
+SELECT name, AVG(length) FROM film JOIN language USING (language_id) group by language_id HAVING AVG(length) > 110;
 -- 5:  Para cada película, muestra cuántas copias hay en el inventario.
+SELECT title, count(inventory_id) AS copias_inventario FROM film JOIN inventory USING(film_id) GROUP BY film_id;
 -- 6:  Lista solo las películas que tienen al menos 5 copias en inventario.
+SELECT title, count(inventory_id) FROM film JOIN inventory USING(film_id) GROUP BY film_id HAVING COUNT(inventory_id) >=5;
 -- 7:  Para cada artículo de inventario, cuenta cuántos alquileres se han realizado.
+SELECT inventory_id, count(rental_id) FROM inventory JOIN rental USING(inventory_id) GROUP BY inventory_id;
 -- 8:  Para cada cliente, muestra cuántos alquileres ha realizado en total.
+SELECT CONCAT(first_name," ", last_name) AS nombre, COUNT(rental_id) FROM customer JOIN rental USING(customer_id) group by customer_id;
 -- 9:  Lista los clientes con 30 o más alquileres acumulados.
+SELECT CONCAT(first_name," ", last_name) AS nombre, COUNT(rental_id) FROM customer JOIN rental USING(customer_id) group by customer_id HAVING COUNT(rental_id)>29;
 -- 10:  Para cada cliente, muestra el total de pagos (suma en euros/dólares) que ha realizado.
+SELECT CONCAT(first_name," ", last_name) AS nombre, SUM(amount) FROM customer JOIN payment USING(customer_id) GROUP BY customer_id;
 -- 11:  Muestra los clientes cuyo importe total pagado es al menos 200.
+SELECT CONCAT(first_name," ", last_name) AS nombre, SUM(amount) FROM customer JOIN payment USING(customer_id) GROUP BY customer_id HAVING SUM(amount) >= 200;
 -- 12:  Para cada empleado (staff), muestra el número de pagos que ha procesado.
+SELECT CONCAT(first_name," ",last_name) AS staff, COUNT(payment_id) AS pagos_procesados FROM staff JOIN payment USING(staff_id) GROUP BY staff_id;
 -- 13:  Para cada empleado, muestra el importe total procesado.
+SELECT CONCAT(first_name," ",last_name) AS staff, SUM(amount) AS importe_total_procesado FROM staff JOIN payment USING(staff_id) GROUP BY staff_id;
 -- 14:  Para cada tienda, cuenta cuántos artículos de inventario tiene.
+SELECT store_id AS tienda, COUNT(inventory_id) AS inventario FROM store JOIN inventory USING(store_id) group by store_id;
 -- 15:  Para cada tienda, cuenta cuántos clientes tiene asignados.
+SELECT store_id AS tienda, COUNT(customer_id) AS clientes_asignados FROM store JOIN customer USING(store_id) group by store_id;
 -- 16:  Para cada tienda, cuenta cuántos empleados (staff) tiene asignados.
+SELECT store_id AS tienda, COUNT(staff_id) AS staff_asignado FROM store JOIN staff USING(store_id) group by store_id;
 -- 17:  Para cada dirección (address), cuenta cuántas tiendas hay ubicadas ahí (debería ser 0/1 en datos estándar).
+SELECT address, count(store_id) FROM address JOIN store USING(address_id) GROUP BY address;
 -- 18:  Para cada dirección, cuenta cuántos empleados residen en esa dirección.
+SELECT address, count(staff_id) FROM address JOIN staff USING(address_id) group by address_id;
 -- 19:  Para cada dirección, cuenta cuántos clientes residen ahí.
+SELECT address, count(customer_id) FROM address JOIN customer USING(address_id) group by address_id;
 -- 20:  Para cada ciudad, cuenta cuántas direcciones hay registradas.
+SELECT city, COUNT(address_id) FROM city JOIN address USING(city_id) group by city_id;
 -- 21:  Para cada país, cuenta cuántas ciudades existen.
+SELECT country, COUNT(city_id) AS ciudades FROM country JOIN city USING(country_id) group by country_id;
 -- 22:  Para cada idioma, calcula la duración media de películas y muestra solo los idiomas con media entre 90 y 120 inclusive.
+SELECT name, AVG(length) FROM language JOIN film USING(language_id) group by language_id HAVING AVG(length) <= 120 AND AVG(length) >= 90;
 -- 23:  Para cada película, cuenta el número de alquileres que se han hecho de cualquiera de sus copias (usando inventario).
+SELECT title, COUNT(rental_id) FROM film JOIN inventory USING(film_id) JOIN rental USING(inventory_id) group by (film_id);
 -- 24:  Para cada cliente, cuenta cuántos pagos ha realizado en 2005 (usando el año de payment_date).
+SELECT CONCAT(first_name," ",last_name) AS nombre, COUNT(payment_id) FROM customer JOIN payment USING(customer_id) WHERE YEAR(payment_date) LIKE 2005 group by customer_id;
 -- 25:  Para cada película, muestra el promedio de tarifa de alquiler (rental_rate) de las copias existentes (es un promedio redundante pero válido).
+SELECT title, AVG(rental_rate) FROM film group by film_id;
 -- 26:  Para cada actor, muestra la duración media (length) de sus películas.
+SELECT CONCAT(first_name," ",last_name) AS nombre, AVG(length) AS duración FROM actor JOIN film_actor USING(actor_id) JOIN film USING(film_id) group by actor_id;
 -- 27:  Para cada ciudad, cuenta cuántos clientes hay (usando la relación cliente->address->city requiere 3 tablas; aquí contamos direcciones por ciudad).
 -- 28:  Para cada película, cuenta cuántos actores tiene asociados.
 -- 29:  Para cada categoría (por id), cuenta cuántas películas pertenecen a ella (sin nombre de categoría para mantener 2 tablas).
