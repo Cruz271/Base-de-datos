@@ -68,6 +68,7 @@ SELECT store_id, COUNT(rental_id) FROM store JOIN inventory USING(store_id) JOIN
 -- SECCIÓN B) 30 CONSULTAS CON JOIN DE 3 TABLAS
 -- ==============================================
 -- 31:  Para cada actor, cuenta cuántas películas tiene y muestra solo los que superan 15 películas.
+SELECT CONCAT(first_name," ",last_name), count(film_id) FROM actor JOIN film_actor USING (actor_id) JOIN film USING (film_id) group by actor_id HAVING COUNT(film_id) >= 15;
 -- 32:  Para cada categoría (por nombre), cuenta cuántas películas hay en esa categoría.
 -- 33:  Para cada película, cuenta cuántos alquileres se han hecho de sus copias.
 -- 34:  Para cada cliente, suma el importe pagado en 2005 y filtra clientes con total >= 150.
