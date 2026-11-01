@@ -57,9 +57,13 @@ SELECT title, AVG(rental_rate) FROM film group by film_id;
 -- 26:  Para cada actor, muestra la duración media (length) de sus películas.
 SELECT CONCAT(first_name," ",last_name) AS nombre, AVG(length) AS duración FROM actor JOIN film_actor USING(actor_id) JOIN film USING(film_id) group by actor_id;
 -- 27:  Para cada ciudad, cuenta cuántos clientes hay (usando la relación cliente->address->city requiere 3 tablas; aquí contamos direcciones por ciudad).
+SELECT city, COUNT(customer_id) FROM customer JOIN address USING (address_id) JOIN city USING(city_id) GROUP BY city;
 -- 28:  Para cada película, cuenta cuántos actores tiene asociados.
+SELECT title, COUNT(actor_id) FROM film JOIN film_actor USING (film_id) GROUP BY film_id;
 -- 29:  Para cada categoría (por id), cuenta cuántas películas pertenecen a ella (sin nombre de categoría para mantener 2 tablas).
+SELECT category_id, COUNT(film_id) FROM film_category JOIN film USING(film_id) GROUP BY category_id;
 -- 30:  Para cada tienda, cuenta cuántos alquileres totales se originan en su inventario.
+SELECT store_id, COUNT(rental_id) FROM store JOIN inventory USING(store_id) JOIN rental USING(inventory_id) GROUP BY store_id;
 -- ==============================================
 -- SECCIÓN B) 30 CONSULTAS CON JOIN DE 3 TABLAS
 -- ==============================================
