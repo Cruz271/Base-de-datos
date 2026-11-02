@@ -70,15 +70,27 @@ SELECT store_id, COUNT(rental_id) FROM store JOIN inventory USING(store_id) JOIN
 -- 31:  Para cada actor, cuenta cuántas películas tiene y muestra solo los que superan 15 películas.
 SELECT CONCAT(first_name," ",last_name), count(film_id) FROM actor JOIN film_actor USING (actor_id) JOIN film USING (film_id) group by actor_id HAVING COUNT(film_id) >= 15;
 -- 32:  Para cada categoría (por nombre), cuenta cuántas películas hay en esa categoría.
+SELECT name, COUNT(film_id) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) GROUP BY category_id;
 -- 33:  Para cada película, cuenta cuántos alquileres se han hecho de sus copias.
+SELECT title, COUNT(rental_id) FROM film JOIN inventory USING(film_id) JOIN rental USING(inventory_id) GROUP BY film_id;
 -- 34:  Para cada cliente, suma el importe pagado en 2005 y filtra clientes con total >= 150.
+SELECT CONCAT(first_name," ",last_name), SUM(amount) FROM customer JOIN rental USING(customer_id) JOIN payment USING(rental_id) WHERE YEAR(payment_date) LIKE 2005 GROUP BY customer.customer_id HAVING SUM(amount) >= 150;
 -- 35:  Para cada tienda, suma el importe cobrado por todos sus empleados.
+-- Me he liado mucho queriendo agrupar tanto por la tienda como por el staff a la vez
+SELECT store_id,  SUM(amount) FROM store JOIN staff USING(store_id) JOIN payment USING(staff_id) GROUP BY store_id;
 -- 36:  Para cada ciudad, cuenta cuántos empleados residen ahí (staff -> address -> city).
+SELECT city_id, city, COUNT(staff_id) FROM staff JOIN address USING(address_id) JOIN city USING(city_id) GROUP BY city_id;
 -- 37:  Para cada ciudad, cuenta cuántas tiendas existen (store -> address -> city).
+SELECT city_id, city, COUNT(store_id) FROM store JOIN address USING(address_id) JOIN city USING(city_id) GROUP BY city_id;
 -- 38:  Para cada actor, calcula la duración media de sus películas del año 2006.
+SELECT actor_id, CONCAT(first_name," ",last_name), AVG(length) FROM film JOIN film_actor USING(film_id) JOIN actor USING(actor_id) where release_year like 2006 GROUP BY actor_id;
 -- 39:  Para cada categoría, calcula la duración media y muestra solo las que superan 120.
+SELECT name, AVG(length) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) group by category_id HAVING AVG(length) >= 120;
 -- 40:  Para cada idioma, suma las tarifas de alquiler (rental_rate) de todas sus películas.
+-- no me sale lo mismo que en la solución pero creo que está bien hecho
+SELECT language_id, name, SUM(rental_rate) FROM language JOIN film USING(language_id) group by language_id;
 -- 41:  Para cada cliente, cuenta cuántos alquileres realizó en fines de semana (SÁB-DO) usando DAYOFWEEK (1=Domingo).
+SELECT CONCAT(first_name," ",last_name), COUNT(rental_id) FROM customer JOIN rental USING(customer_id) WHERE  DAYOFWEEK(RENTAL_DATE) = '1' OR DAYOFWEEK(rental_date) = '7' group by customer_id;
 -- 42:  Para cada actor, muestra el total de títulos distintos en los que participa (equivale a COUNT DISTINCT, sin subconsulta).
 -- 43:  Para cada ciudad, cuenta cuántos clientes residen ahí (customer -> address -> city).
 -- 44:  Para cada categoría, muestra cuántos actores distintos participan en películas de esa categoría.
