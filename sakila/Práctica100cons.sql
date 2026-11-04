@@ -92,18 +92,34 @@ SELECT language_id, name, SUM(rental_rate) FROM language JOIN film USING(languag
 -- 41:  Para cada cliente, cuenta cuántos alquileres realizó en fines de semana (SÁB-DO) usando DAYOFWEEK (1=Domingo).
 SELECT CONCAT(first_name," ",last_name), COUNT(rental_id) FROM customer JOIN rental USING(customer_id) WHERE  DAYOFWEEK(RENTAL_DATE) = '1' OR DAYOFWEEK(rental_date) = '7' group by customer_id;
 -- 42:  Para cada actor, muestra el total de títulos distintos en los que participa (equivale a COUNT DISTINCT, sin subconsulta).
+SELECT CONCAT(first_name," ", last_name), COUNT(distinct(film_id)) FROM actor JOIN film_actor USING(actor_id) JOIN film USING(film_id) GROUP BY actor_id;
 -- 43:  Para cada ciudad, cuenta cuántos clientes residen ahí (customer -> address -> city).
+SELECT city, COUNT(customer_id) FROM customer JOIN address USING(address_id) JOIN city USING(city_id) GROUP BY city_id;
 -- 44:  Para cada categoría, muestra cuántos actores distintos participan en películas de esa categoría.
+SELECT name, COUNT(DISTINCT(actor_id)) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN film_actor USING(film_id) GROUP BY category_id;
 -- 45:  Para cada tienda, cuenta cuántas copias totales (inventario) tiene de películas en 2006.
+-- tengo dudas porque no veo en las tablas que haya una fecha de inventario, pero si lo hago con el where, que es lo que se tendría que hacer, me da el mismo resultado.
+SELECT store_id, count(inventory_id) FROM store JOIN inventory USING(store_id) GROUP BY store_id;
 -- 46:  Para cada cliente, suma el total pagado por alquileres cuyo empleado pertenece a la tienda 1.
+-- customer -> rental -> staff
+SELECT CONCAT(customer.first_name," ",customer.last_name), SUM(amount) FROM customer JOIN payment USING(customer_id) JOIN staff USING(staff_id) where staff.store_id like 1 GROUP BY customer_id;
 -- 47:  Para cada película, cuenta cuántos actores tienen el apellido de longitud >= 5.
+SELECT title ,count(actor_id) FROM film JOIN film_actor USING(film_id) JOIN actor USING(actor_id) WHERE length(last_name) >= 5 GROUP BY film_id;
 -- 48:  Para cada categoría, suma la duración total (length) de sus películas.
+SELECT name, SUM(length) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) GROUP BY category_id;
 -- 49:  Para cada ciudad, suma los importes pagados por clientes que residen en esa ciudad.
+-- tengo dudas de si está o no completo aunque me de el mismo resultado.
+SELECT city, SUM(amount) FROM city JOIN address USING(city_id) JOIN customer USING(address_id) JOIN payment USING(customer_id) GROUP BY city_id;
 -- 50:  Para cada idioma, cuenta cuántos actores distintos participan en películas de ese idioma.
+SELECT name, count(distinct(actor_id)) FROM language JOIN film USING(language_id) JOIN film_actor USING(film_id) GROUP BY language_id;
 -- 51:  Para cada tienda, cuenta cuántos clientes activos (active=1) tiene.
+SELECT store_id, COUNT(active) FROM store JOIN customer USING(store_id) WHERE active = 1 GROUP BY store_id;
 -- 52:  Para cada cliente, cuenta en cuántas categorías distintas ha alquilado (aprox. vía film_category; requiere 4 tablas, aquí contamos películas 2006 por inventario).
+SELECT CONCAT(first_name," ",last_name), COUNT(DISTINCT(category_id)) FROM customer JOIN rental USING(customer_id) JOIN inventory USING(inventory_id) JOIN film USING(film_id) JOIN film_category USING(film_id) WHERE YEAR(rental_date) LIKE 2006 GROUP BY customer_id;
 -- 53:  Para cada empleado, cuenta cuántos clientes diferentes le han pagado.
+SELECT staff_id, COUNT(distinct(customer_id)) FROM staff JOIN payment USING(staff_id) JOIN customer USING(customer_id) GROUP BY staff_id;
 -- 54:  Para cada ciudad, cuenta cuántas películas del año 2006 han sido alquiladas por residentes en esa ciudad.
+SELECT city, COUNT(rental_id) FROM city JOIN address USING(city_id) JOIN customer USING(address_id) JOIN rental USING(customer_id) WHERE YEAR(rental_date) LIKE 2006 GROUP BY city_id;
 -- 55:  Para cada categoría, calcula el promedio de replacement_cost de sus películas.
 -- 56:  Para cada tienda, suma los importes cobrados en 2006 (vía empleados de esa tienda).
 -- 57:  Para cada actor, cuenta cuántas películas tienen título de más de 12 caracteres.
