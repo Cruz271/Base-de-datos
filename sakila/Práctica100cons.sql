@@ -1,5 +1,4 @@
 use sakila;
-
 -- ==============================================
 -- SECCIÓN A) 30 CONSULTAS CON JOIN DE 2 TABLAS
 -- ==============================================
@@ -97,9 +96,8 @@ SELECT CONCAT(first_name," ", last_name), COUNT(distinct(film_id)) FROM actor JO
 SELECT city, COUNT(customer_id) FROM customer JOIN address USING(address_id) JOIN city USING(city_id) GROUP BY city_id;
 -- 44:  Para cada categoría, muestra cuántos actores distintos participan en películas de esa categoría.
 SELECT name, COUNT(DISTINCT(actor_id)) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN film_actor USING(film_id) GROUP BY category_id;
--- 45:  Para cada tienda, cuenta cuántas copias totales (inventario) tiene de películas en 2006.
--- tengo dudas porque no veo en las tablas que haya una fecha de inventario, pero si lo hago con el where, que es lo que se tendría que hacer, me da el mismo resultado.
-SELECT store_id, count(inventory_id) FROM store JOIN inventory USING(store_id) GROUP BY store_id;
+-- 45:  Para cada tienda, cuenta cuántas copias totales (inventario) tiene de películas de 2006.
+SELECT store_id, count(inventory_id) FROM store JOIN inventory USING(store_id) JOIN film USING(film_id) WHERE release_year LIKE 2006 GROUP BY store_id;
 -- 46:  Para cada cliente, suma el total pagado por alquileres cuyo empleado pertenece a la tienda 1.
 -- customer -> rental -> staff
 SELECT CONCAT(customer.first_name," ",customer.last_name), SUM(amount) FROM customer JOIN payment USING(customer_id) JOIN staff USING(staff_id) where staff.store_id like 1 GROUP BY customer_id;
@@ -121,23 +119,39 @@ SELECT staff_id, COUNT(distinct(customer_id)) FROM staff JOIN payment USING(staf
 -- 54:  Para cada ciudad, cuenta cuántas películas del año 2006 han sido alquiladas por residentes en esa ciudad.
 SELECT city, COUNT(rental_id) FROM city JOIN address USING(city_id) JOIN customer USING(address_id) JOIN rental USING(customer_id) WHERE YEAR(rental_date) LIKE 2006 GROUP BY city_id;
 -- 55:  Para cada categoría, calcula el promedio de replacement_cost de sus películas.
+SELECT name, AVG(replacement_cost) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) GROUP BY category_id;
 -- 56:  Para cada tienda, suma los importes cobrados en 2006 (vía empleados de esa tienda).
+SELECT store_id, SUM(amount) FROM store JOIN staff USING(store_id) JOIN payment USING(staff_id) WHERE YEAR(payment_date) LIKE 2006 group by store_id;
 -- 57:  Para cada actor, cuenta cuántas películas tienen título de más de 12 caracteres.
+SELECT CONCAT(first_name, " ", last_name) AS nombre, COUNT(film_id) FROM actor JOIN film_actor USING(actor_id) JOIN film USING(film_id) WHERE length(title) > 12 GROUP BY actor_id;
 -- 58:  Para cada ciudad, calcula la suma de pagos de 2005 y filtra las ciudades con total >= 300.
+SELECT city, SUM(amount) FROM city JOIN	address USING(city_id) JOIN customer USING(address_id) JOIN payment USING(customer_id) WHERE payment_date LIKE '%2005%' GROUP BY city_id HAVING SUM(amount) >= 300;
 -- 59:  Para cada categoría, cuenta cuántas películas tienen rating 'PG' o 'PG-13'.
+SELECT name, COUNT(film_id) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id)  WHERE rating like '%PG%' AND rating like 'PG-13%' GROUP BY category_id;
 -- 60:  Para cada cliente, calcula el total pagado en pagos procesados por el empleado 2.
+SELECT CONCAT(customer.first_name," ",customer.last_name) AS cliente, sum(amount) FROM customer JOIN payment USING(customer_id) JOIN staff USING(staff_id) WHERE staff_id LIKE '2' GROUP BY customer_id;
 -- ==============================================
 -- SECCIÓN C) 20 CONSULTAS CON JOIN DE 4 TABLAS
 -- ==============================================
 -- 61:  Para cada ciudad, cuenta cuántos clientes hay y muestra solo ciudades con 10 o más clientes.
+SELECT city, COUNT(customer_id) FROM city JOIN address USING(city_id) JOIN customer USING(address_id) GROUP BY city_id HAVING COUNT(customer_id) >= 10;
 -- 62:  Para cada actor, cuenta cuántos alquileres totales suman todas sus películas.
+SELECT CONCAT(first_name," ",last_name), COUNT(rental_id) FROM actor JOIN film_actor USING(actor_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN(rental) USING(inventory_id) GROUP BY actor_id;
 -- 63:  Para cada categoría, suma los importes pagados derivados de películas de esa categoría.
+SELECT name, SUM(amount) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id) JOIN(payment) USING(rental_id) GROUP BY category_id;
 -- 64:  Para cada ciudad, suma los importes pagados por clientes residentes en esa ciudad en 2005.
+SELECT city, SUM(amount) FROM city JOIN address USING(city_id) JOIN customer USING(address_id) JOIN payment USING(customer_id) WHERE YEAR(PAYMENT_DATE) LIKE 2005 GROUP BY city_id;
 -- 65:  Para cada tienda, cuenta cuántos actores distintos aparecen en las películas de su inventario.
+SELECT store_id, COUNT(DISTINCT(actor_id))  FROM store JOIN inventory USING(store_id) JOIN film USING(film_id) JOIN film_actor USING(film_id) GROUP BY store_id;
 -- 66:  Para cada idioma, cuenta cuántos alquileres totales se han hecho de películas en ese idioma.
+SELECT name, COUNT(rental_id) FROM language JOIN film USING(language_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id) GROUP BY language_id;
 -- 67:  Para cada cliente, cuenta en cuántos meses distintos de 2005 realizó pagos (meses distintos).
+SELECT CONCAT(customer.first_name," ",customer.last_name) AS nombre, COUNT(DISTINCT(MONTH(payment_date))) FROM customer JOIN payment ON customer.customer_id=payment.customer_id WHERE YEAR(payment_date) LIKE 2005 GROUP BY customer.customer_id;
 -- 68:  Para cada categoría, calcula la duración media de las películas alquiladas (considerando solo películas alquiladas).
+SELECT name, AVG(length) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) WHERE rental_duration != 0 GROUP BY category_id; -- este me da mal incluso sin el where
+SELECT name, AVG(length) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id)  GROUP BY category_id; -- este me da bien
 -- 69:  Para cada país, cuenta cuántos clientes hay (country -> city -> address -> customer).
+SELECT country, COUNT(customer_id) FROM country JOIN city USING(country_id) JOIN address USING(city_id) JOIN customer USING(address_id) GROUP BY country_id;
 -- 70:  Para cada país, suma los importes pagados por sus clientes.
 -- 71:  Para cada tienda, cuenta cuántas categorías distintas existen en su inventario.
 -- 72:  Para cada tienda, suma la recaudación por categoría (resultado agregado por tienda y categoría).
