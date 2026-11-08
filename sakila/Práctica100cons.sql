@@ -153,6 +153,7 @@ SELECT name, AVG(length) FROM category JOIN film_category USING(category_id) JOI
 -- 69:  Para cada país, cuenta cuántos clientes hay (country -> city -> address -> customer).
 SELECT country, COUNT(customer_id) FROM country JOIN city USING(country_id) JOIN address USING(city_id) JOIN customer USING(address_id) GROUP BY country_id;
 -- 70:  Para cada país, suma los importes pagados por sus clientes.
+
 -- 71:  Para cada tienda, cuenta cuántas categorías distintas existen en su inventario.
 -- 72:  Para cada tienda, suma la recaudación por categoría (resultado agregado por tienda y categoría).
 -- 73:  Para cada actor, cuenta en cuántas tiendas distintas se han alquilado sus películas.
