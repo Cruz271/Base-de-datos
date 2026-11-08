@@ -1,5 +1,4 @@
 use sakila;
--- 70
 -- ==============================================
 -- SECCIÓN A) 30 CONSULTAS CON JOIN DE 2 TABLAS
 -- ==============================================
@@ -159,14 +158,37 @@ SELECT country, SUM(amount) FROM country JOIN city USING(country_id) JOIN addres
 SELECT store_id, COUNT(distinct(category_id)) FROM store JOIN inventory USING(store_id) JOIN film USING(film_id) JOIN film_category USING(film_id) GROUP BY store_id;
 -- 72:  Para cada tienda, suma la recaudación por categoría (resultado agregado por tienda y categoría).
 SELECT * FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN store USING(store_id) JOIN customer USING(store_id) JOIN payment USING(customer_id) order by category_id;
+-- gemini
+SELECT 
+    i.store_id,
+    c.name AS categoria,
+    SUM(p.amount) AS total_recaudacion
+FROM category c
+JOIN film_category fc USING (category_id)
+JOIN film f USING (film_id)
+JOIN inventory i USING (film_id)
+JOIN rental r USING (inventory_id)
+JOIN payment p USING (rental_id)
+GROUP BY i.store_id, c.category_id;
 -- 73:  Para cada actor, cuenta en cuántas tiendas distintas se han alquilado sus películas.
+SELECT CONCAT(first_name," ",last_name), COUNT(distinct(store_id)) FROM actor JOIN film_actor USING(actor_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id) GROUP BY actor_id;
 -- 74:  Para cada categoría, cuenta cuántos clientes distintos han alquilado películas de esa categoría.
+SELECT name, COUNT(distinct(customer_id)) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id) JOIN customer USING(customer_id) GROUP BY category_id;
 -- 75:  Para cada idioma, cuenta cuántos actores distintos participan en películas alquiladas en ese idioma.
+SELECT name, COUNT(distinct(actor_id)) FROM language JOIN film USING(language_id) JOIN film_actor USING(film_id) JOIN actor USING(actor_id) GROUP BY language_id;
 -- 76:  Para cada país, cuenta cuántas tiendas hay (país->ciudad->address->store).
+SELECT country, COUNT(store_id) FROM country JOIN city USING(country_id) JOIN address USING(city_id) JOIN store USING (address_id) GROUP BY country_id;
 -- 77:  Para cada cliente, cuenta los alquileres en los que la devolución (return_date) fue el mismo día del alquiler.
+SELECT customer_id, CONCAT(first_name," ",last_name) AS name, COUNT(rental_id) AS same_day_returns FROM customer JOIN rental USING(customer_id) WHERE DATE(rental_date) = DATE(return_date) GROUP BY customer_id;
 -- 78:  Para cada tienda, cuenta cuántos clientes distintos realizaron pagos en 2005.
+-- estoy teniendo problemas al entender lo de que si cuento desde store o desde customer me dan otros resultados... los dos primeros son con esos conceptos que me son más naturales
+SELECT store_id, COUNT(DISTINCT(customer_id)) FROM store JOIN customer USING(store_id) JOIN payment USING(customer_id) WHERE YEAR(payment_date) like "2005" GROUP BY store_id;
+SELECT store_id, COUNT(DISTINCT(customer.customer_id)) FROM customer JOIN rental USING(customer_id) JOIN payment USING(rental_id) GROUP BY store_id;
+SELECT store_id, count(distinct(p.customer_id)) FROM inventory JOIN rental USING(inventory_id) JOIN payment p USING(rental_id) WHERE YEAR(payment_date) like "2005" GROUP BY store_id; -- sigo sin entender por qué esto funciona y lo anterior no.
 -- 79:  Para cada categoría, cuenta cuántas películas con título de longitud > 15 han sido alquiladas.
+SELECT name, count(rental_id) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id) WHERE LENGTH(TITLE) > 15 GROUP BY category_id;
 -- 80:  Para cada país, suma los pagos procesados por los empleados de las tiendas ubicadas en ese país.
+SELECT country, SUM(amount) FROM country JOIN city USING(country_id) JOIN address USING(city_id) JOIN staff USING(address_id) JOIN payment USING(staff_id) GROUP BY country_id;
 -- ==============================================
 -- SECCIÓN D) 20 CONSULTAS EXTRA (DIFICULTAD +), <=4 JOINS
 -- ==============================================
