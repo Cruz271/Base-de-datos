@@ -193,15 +193,26 @@ SELECT country, SUM(amount) FROM country JOIN city USING(country_id) JOIN addres
 -- SECCIÓN D) 20 CONSULTAS EXTRA (DIFICULTAD +), <=4 JOINS
 -- ==============================================
 -- 81:  Para cada cliente, muestra el total pagado con IVA teórico del 21% aplicado (total*1.21), redondeado a 2 decimales.
+SELECT CONCAT(first_name," ",last_name), round(SUM(amount)*1.21, 2) FROM customer JOIN payment USING(customer_id) GROUP BY customer_id;
 -- 82:  Para cada hora del día (0-23), cuenta cuántos alquileres se iniciaron en esa hora.
+SELECT HOUR(rental_date) AS hora_del_dia , count(rental_id) FROM rental GROUP BY HOUR(rental_date) order by hora_del_dia;
 -- 83:  Para cada tienda, muestra la media de length de las películas alquiladas en 2005 y filtra las tiendas con media >= 100.
+SELECT store_id AS tienda, AVG(length) FROM store JOIN inventory USING(store_id) JOIN film USING(film_id) JOIN rental USING(inventory_id) WHERE  YEAR(rental_date) LIKE 2005 GROUP BY store_id HAVING AVG(length)>= 100;
 -- 84:  Para cada categoría, muestra la media de replacement_cost de las películas alquiladas un domingo.
+SELECT name, AVG(replacement_cost) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id) WHERE DAYOFWEEK(rental_date) LIKE '1' GROUP BY category_id;
 -- 85:  Para cada empleado, muestra el importe total por pagos realizados entre las 00:00 y 06:00 (inclusive 00:00, exclusivo 06:00).
+SELECT staff_id, SUM(amount) FROM staff JOIN payment USING(staff_id)  WHERE HOUR(payment_date) >= 0 AND HOUR(payment_date) < 6 GROUP BY staff_id;
 -- 86:  Para cada actor, cuenta cuántas de sus películas tienen un título que contiene la palabra 'LOVE' (mayúsculas).
+SELECT actor_id, CONCAT(first_name," ",last_name), COUNT(film_id) FROM actor JOIN film_actor USING(actor_id) JOIN film USING(film_id) WHERE title LIKE "%LOVE%" GROUP BY actor_id ORDER BY actor_id;
 -- 87:  Para cada idioma, muestra el total de pagos de alquileres de películas en ese idioma.
+-- quería probar el left join con este que se que tiene el resto de idiomas que no tienen peliculas 
+SELECT name, sum(amount) FROM language LEFT JOIN film USING(language_id) LEFT JOIN inventory USING(film_id) LEFT JOIN rental USING(inventory_id) LEFT JOIN payment USING(rental_id) GROUP BY language_id;
 -- 88:  Para cada cliente, cuenta en cuántos días distintos de 2005 realizó algún alquiler.
+SELECT concat(first_name," ",last_name), count(distinct(dayofyear(rental_date))) FROM customer JOIN rental USING(customer_id) where year(rental_date) = 2005 GROUP BY customer_id;
 -- 89:  Para cada categoría, calcula la longitud media de títulos (número de caracteres) de sus películas alquiladas.
+SELECT name, AVG(length(title)) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id)  GROUP BY category_id;
 -- 90:  Para cada tienda, cuenta cuántos clientes distintos alquilaron en el primer trimestre de 2006 (enero-marzo).
+SELECT store_id, count(distinct(customer_id)) FROM rental JOIN inventory USING(inventory_id) JOIN store USING(store_id) where year(rental_date) = 2006 AND month(rental_date) between 1 AND 3 GROUP BY store_id;
 -- 91:  Para cada país, cuenta cuántas categorías diferentes han sido alquiladas por clientes residentes en ese país.
 -- 92:  Para cada cliente, muestra el importe medio de sus pagos redondeado a 2 decimales, solo si ha hecho al menos 10 pagos.
 -- 93:  Para cada categoría, muestra el número de películas con replacement_cost > 20 que hayan sido alquiladas al menos una vez.
