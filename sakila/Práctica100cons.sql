@@ -214,9 +214,14 @@ SELECT name, AVG(length(title)) FROM category JOIN film_category USING(category_
 -- 90:  Para cada tienda, cuenta cuántos clientes distintos alquilaron en el primer trimestre de 2006 (enero-marzo).
 SELECT store_id, count(distinct(customer_id)) FROM rental JOIN inventory USING(inventory_id) JOIN store USING(store_id) where year(rental_date) = 2006 AND month(rental_date) between 1 AND 3 GROUP BY store_id;
 -- 91:  Para cada país, cuenta cuántas categorías diferentes han sido alquiladas por clientes residentes en ese país.
+SELECT country_id, country, COUNT(distinct(category_id)) FROM country JOIN city USING(country_id) JOIN address USING(city_id) JOIN customer USING(address_id) JOIN rental USING(customer_id) JOIN inventory USING(inventory_id) JOIN film USING(film_id) JOIN film_category USING(film_id) GROUP BY country_id;
 -- 92:  Para cada cliente, muestra el importe medio de sus pagos redondeado a 2 decimales, solo si ha hecho al menos 10 pagos.
+SELECT concat(first_name," ",last_name) AS name, round(AVG(amount), 2) FROM customer JOIN payment USING(customer_id) GROUP BY customer_id HAVING count(amount) >= 10;
 -- 93:  Para cada categoría, muestra el número de películas con replacement_cost > 20 que hayan sido alquiladas al menos una vez.
+SELECT name, COUNT(distinct(film_id)) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id) WHERE replacement_cost > 20 GROUP BY category_id;
 -- 94:  Para cada tienda, suma los importes pagados en fines de semana.
+-- no me da lo mismo pero creo que es así
+SELECT store_id, SUM(amount) FROM store JOIN inventory USING(store_id) JOIN rental USING(inventory_id) JOIN payment USING(rental_id) WHERE dayofweek(payment_date) IN(7,1) GROUP BY store_id;
 -- 95:  Para cada actor, cuenta cuántas películas suyas fueron alquiladas por al menos 5 clientes distintos (se cuenta alquileres y luego se filtra por HAVING).
 -- 96:  Para cada idioma, muestra el número de películas cuyo título empieza por la letra 'A' y que han sido alquiladas.
 -- 97:  Para cada país, suma el importe total de pagos realizados por clientes residentes y filtra países con total >= 1000.
