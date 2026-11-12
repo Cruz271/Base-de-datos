@@ -223,9 +223,20 @@ SELECT name, COUNT(distinct(film_id)) FROM category JOIN film_category USING(cat
 -- no me da lo mismo pero creo que es así
 SELECT store_id, SUM(amount) FROM store JOIN inventory USING(store_id) JOIN rental USING(inventory_id) JOIN payment USING(rental_id) WHERE dayofweek(payment_date) IN(7,1) GROUP BY store_id;
 -- 95:  Para cada actor, cuenta cuántas películas suyas fueron alquiladas por al menos 5 clientes distintos (se cuenta alquileres y luego se filtra por HAVING).
+-- esta es la solución que aporto yo, puesto que dice CUANTAS PELÍCULAS, asi que cuento a partir de film_id
+SELECT concat(first_name," ",last_name), count(distinct(film_id)) FROM actor JOIN film_actor USING(actor_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id) GROUP BY actor_id HAVING COUNT(DISTINCT(customer_id)) >= 5;
+-- esta es la solución que creo que das tu, porque es lo que da el mismo resultado, contando el customer_id, pero eso solo me dice el número diferente de clientes que han alquilado esa película
+SELECT concat(first_name," ",last_name), count(distinct(customer_id)) FROM actor JOIN film_actor USING(actor_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id) GROUP BY actor_id HAVING COUNT(DISTINCT(customer_id)) >= 5;
 -- 96:  Para cada idioma, muestra el número de películas cuyo título empieza por la letra 'A' y que han sido alquiladas.
+SELECT name, count(distinct(film_id)) FROM language  JOIN film USING(language_id)  JOIN inventory USING(film_id)  JOIN rental USING(inventory_id)  WHERE title like 'A%' GROUP BY language_id; 
 -- 97:  Para cada país, suma el importe total de pagos realizados por clientes residentes y filtra países con total >= 1000.
+SELECT country, sum(amount) AS pago_total FROM country JOIN city USING(country_id) JOIN address USING(city_id) JOIN customer USING(address_id) JOIN payment USING(customer_id) GROUP BY country_id HAVING SUM(amount) >= 1000;
 -- 98:  Para cada cliente, cuenta cuántos días han pasado entre su primer y su último alquiler en 2005 (diferencia de fechas), mostrando solo clientes con >= 5 alquileres en 2005.
 --     (Se evita subconsulta calculando sobre el conjunto agrupado por cliente y usando MIN/MAX de rental_date en 2005).
+SELECT concat(first_name," ",last_name) AS name, datediff(max(rental_date),min(rental_date)) AS días FROM customer JOIN rental USING(customer_id) WHERE year(rental_date) = 2005 group by customer_id having count(rental_id) >= 5;
 -- 99:  Para cada tienda, muestra la media de importes cobrados por transacción en el año 2006, con dos decimales.
+describe payment;
+SELECT store_id, round(AVG(AMOUNT), 2) FROM store JOIN staff USING(store_id) JOIN payment USING(staff_id) WHERE YEAR(payment_date) = 2006 GROUP BY store_id;
 -- 100:  Para cada categoría, calcula la media de duración (length) de películas alquiladas en 2006 y ordénalas descendentemente por dicha media.
+SELECT name, AVG(length) FROM category JOIN film_category USING(category_id) JOIN film USING(film_id) JOIN inventory USING(film_id) JOIN rental USING(inventory_id) WHERE YEAR(rental_date) = 2006 GROUP BY category_id ORDER BY AVG(length) DESC;
+SELECT * FROM film;
