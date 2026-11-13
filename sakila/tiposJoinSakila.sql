@@ -62,5 +62,8 @@ FROM film f LEFT JOIN inventory i ON f.film_id = i.film_id
             GROUP BY f.film_id
             HAVING COUNT(rental_id) = 0;
     
--- listado de actores que no salen en 
+-- obten el listado de idiomas que no tienen ninguna película 
+SELECT * FROM language LEFT JOIN film USING(language_id) WHERE film_id is null;
+-- ¿Hay algún actor que no salga en ninguna película?
+SELECT concat(first_name," ",last_name) FROM actor left JOIN film_actor USING(actor_id) left JOIN film USING(film_id) WHERE film_id IS NULL;
 
