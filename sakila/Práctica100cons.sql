@@ -75,7 +75,6 @@ SELECT title, COUNT(rental_id) FROM film JOIN inventory USING(film_id) JOIN rent
 -- 34:  Para cada cliente, suma el importe pagado en 2005 y filtra clientes con total >= 150.
 SELECT CONCAT(first_name," ",last_name), SUM(amount) FROM customer JOIN rental USING(customer_id) JOIN payment USING(rental_id) WHERE YEAR(payment_date) LIKE 2005 GROUP BY customer.customer_id HAVING SUM(amount) >= 150;
 -- 35:  Para cada tienda, suma el importe cobrado por todos sus empleados.
--- Me he liado mucho queriendo agrupar tanto por la tienda como por el staff a la vez
 SELECT store_id,  SUM(amount) FROM store JOIN staff USING(store_id) JOIN payment USING(staff_id) GROUP BY store_id;
 -- 36:  Para cada ciudad, cuenta cuántos empleados residen ahí (staff -> address -> city).
 SELECT city_id, city, COUNT(staff_id) FROM staff JOIN address USING(address_id) JOIN city USING(city_id) GROUP BY city_id;
@@ -181,7 +180,6 @@ SELECT country, COUNT(store_id) FROM country JOIN city USING(country_id) JOIN ad
 -- 77:  Para cada cliente, cuenta los alquileres en los que la devolución (return_date) fue el mismo día del alquiler.
 SELECT customer_id, CONCAT(first_name," ",last_name) AS name, COUNT(rental_id) AS same_day_returns FROM customer JOIN rental USING(customer_id) WHERE DATE(rental_date) = DATE(return_date) GROUP BY customer_id;
 -- 78:  Para cada tienda, cuenta cuántos clientes distintos realizaron pagos en 2005.
--- estoy teniendo problemas al entender lo de que si cuento desde store o desde customer me dan otros resultados... los dos primeros son con esos conceptos que me son más naturales
 SELECT store_id, COUNT(DISTINCT(customer_id)) FROM store JOIN customer USING(store_id) JOIN payment USING(customer_id) WHERE YEAR(payment_date) like "2005" GROUP BY store_id;
 SELECT store_id, COUNT(DISTINCT(customer.customer_id)) FROM customer JOIN rental USING(customer_id) JOIN payment USING(rental_id) GROUP BY store_id;
 SELECT store_id, count(distinct(p.customer_id)) FROM inventory JOIN rental USING(inventory_id) JOIN payment p USING(rental_id) WHERE YEAR(payment_date) like "2005" GROUP BY store_id; -- sigo sin entender por qué esto funciona y lo anterior no.
