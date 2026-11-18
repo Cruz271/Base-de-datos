@@ -89,3 +89,38 @@ SELECT a.first_name AS nombre,a.last_name AS apellido,COUNT(*) AS peliculas FROM
 
 -- Consulta 5: Cobros mensuales por empleado
 SELECT s.first_name AS nombre,s.last_name AS apellido,YEAR(p.payment_date) AS anio,MONTH(p.payment_date) AS mes,COUNT(*) AS pagos,COUNT(DISTINCT p.customer_id) AS clientes,ROUND(SUM(p.amount),2) AS importe_total FROM staff s JOIN payment p ON s.staff_id=p.staff_id GROUP BY s.staff_id,s.first_name,s.last_name,YEAR(p.payment_date),MONTH(p.payment_date) ORDER BY anio,mes,apellido,nombre;
+
+
+-- SIMULACRO EXAMEN B 	
+-- CONSULTA 1: 
+SELECT store_id, count(inventory_id), count(distinct(title)) FROM store JOIN inventory USING(store_id) JOIN film USING(film_id) GROUP BY store_id ORDER BY store_id ASC;
+-- CONSULTA 2:
+SELECT title, name, replacement_cost, rental_rate, replacement_cost - rental_rate AS diferencia_coste FROM language JOIN film USING(language_id) WHERE replacement_cost - rental_rate > 20 GROUP BY title, name, replacement_cost, rental_rate ORDER BY replacement_cost - rental_rate DESC, title ASC; 
+-- CONSULTA 3:
+SELECT country, count(city_id) FROM country JOIN city USING(country_id) where country in ('Canada', 'India') group by country_id  ORDER BY count(city_id) DESC, country ASC; 
+-- CONSULTA 4: 
+SELECT CONCAT(first_name," ", last_name), count(film_id) FROM actor JOIN film_actor USING(actor_id) JOIN film USING(film_id) WHERE LENGTH(last_name) >= 8 GROUP BY actor_id HAVING count(film_id) >= 25 ORDER BY count(film_id) DESC, last_name ASC;
+-- CONSULTA 5:
+SELECT YEAR(rental_date), MONTH(rental_date), count(rental_id), count(return_date) FROM customer JOIN rental USING(customer_id) WHERE last_name like 'M%' GROUP BY YEAR(rental_date), MONTH(rental_date) ORDER BY year(rental_date) ASC, MONTH(rental_date) ASC;
+
+
+
+
+
+
+
+-- enseñame actores, y en cuantas peliculas sale que el nombre contenga la letra "s" y haya estado en 20 películas o más
+
+select  count(film_id)
+from film 
+where length(title) <= 10 AND length(title) >=9
+;
+
+
+
+
+
+
+
+
+
